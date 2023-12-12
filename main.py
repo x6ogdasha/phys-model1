@@ -10,7 +10,7 @@ velocity2 = (-10*square2_mass, 0)
 
 # Настройки PyGame
 RES = WIDTH, HEIGHT = 970, 720
-FPS = 60
+FPS = 120
 
 pg.init()
 surface = pg.display.set_mode(RES)
@@ -19,7 +19,7 @@ draw_options = pymunk.pygame_util.DrawOptions(surface)
 
 # Настройки PyMunk
 space = pymunk.Space()
-space.gravity = 0, 9000
+space.gravity = 0, 900000
 
 # Платформа
 segment_shape = pymunk.Segment(space.static_body, (1, HEIGHT), (WIDTH, HEIGHT), 26)
@@ -95,5 +95,5 @@ while True:
     space.debug_draw(draw_options)
 
     pg.display.flip()
-    clock.tick(FPS)
+    clock.tick(FPS*150)
 
