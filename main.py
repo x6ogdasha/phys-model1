@@ -24,7 +24,7 @@ WALL_HEIGHT = SCREEN_HEIGHT
 
 # Массы и цвета кубов
 MASS_CUBE1 = 1
-MASS_CUBE2 = 10
+MASS_CUBE2 = 1000000ц
 CUBE1_COLOR = RED
 CUBE2_COLOR = BLUE
 
@@ -47,20 +47,24 @@ wall_rect.topleft = (0, 0)
 # Создание первого куба
 cube1_speed = 0
 cube1_mass = MASS_CUBE1
-cube1 = pygame.Surface((50, 50))
+cube1 = pygame.Surface((100, 100))
 cube1.fill(CUBE1_COLOR)
 cube1_rect = cube1.get_rect()
 cube1_rect.topleft = (100, SCREEN_HEIGHT - PLATFORM_HEIGHT - cube1.get_height())
 
 # Создание второго куба с начальной скоростью
-cube2_speed = -2
+cube2_speed = -0.01
 cube2_mass = MASS_CUBE2
 cube2 = pygame.Surface((30, 30))
 cube2.fill(CUBE2_COLOR)
 cube2_rect = cube2.get_rect()
-cube2_rect.topleft = (200, SCREEN_HEIGHT - PLATFORM_HEIGHT - cube2.get_height())
+cube2_rect.topleft = (200.0, SCREEN_HEIGHT - PLATFORM_HEIGHT - cube2.get_height())
 
-count = 0;
+count = 0
+dx1 = 0.0
+dx2 = 0.0
+trueOrder = True
+
 # Основной цикл программы
 while True:
     for event in pygame.event.get():
@@ -68,30 +72,45 @@ while True:
             pygame.quit()
             sys.exit()
 
-
     # Проверка столкновения кубов и изменение направления с учетом упругости столкновения
-    if cube1_rect.colliderect(cube2_rect):
+    if cube1_rect.colliderect(cube2_rect) and trueOrder:
         print(f"init speed1 {cube1_speed} speed2 {cube2_speed}")
         # Рассчитываем измененные скорости по нормали с учетом упругости столкновения
         tempSpeed1 = cube1_speed
-        cube1_speed = (cube1_speed * (cube1_mass - cube2_mass) + 2 * cube2_mass * cube2_speed) / (cube1_mass + cube2_mass)
-        cube2_speed = (cube2_speed * (cube2_mass - cube1_mass) + 2 * cube1_mass * tempSpeed1) / (cube1_mass + cube2_mass)
+        cube1_speed = (cube1_speed * (cube1_mass - cube2_mass) + 2 * cube2_mass * cube2_speed) / (
+                    cube1_mass + cube2_mass)
+        cube2_speed = (cube2_speed * (cube2_mass - cube1_mass) + 2 * cube1_mass * tempSpeed1) / (
+                    cube1_mass + cube2_mass)
         print(f"after speed1 {cube1_speed} speed2 {cube2_speed}\n")
 
+        trueOrder = not trueOrder
         count += 1
         print(count)
-
 
     # Проверка столкновения куба 1 со стеной и изменение направления
-    if cube1_rect.left <= wall_rect.right or cube1_rect.right >= SCREEN_WIDTH:
+    if cube1_rect.left <= wall_rect.right and not trueOrder and cube1_speed < 0:
         cube1_speed = -cube1_speed
 
+        trueOrder = not trueOrder
         count += 1
         print(count)
 
-    # Обновление положения кубов
-    cube1_rect.x += cube1_speed
-    cube2_rect.x += cube2_speed
+    dx1 += cube1_speed
+    dx2 += cube2_speed
+
+    if dx1 > 1 or dx1 < -1:
+        dx = int(dx1)
+        cube1_rect.x += dx
+        dx1 = dx1 - int(dx1)
+        isChanged = True
+        isReversed= True
+
+    if dx2 > 1 or dx2 < -1:
+        dx = int(dx2)
+        cube2_rect.x += dx
+        dx2 = dx2 - int(dx2)
+        isChanged = True
+        isReversed = True
 
     # Обновление экрана
     screen.fill(BLACK)
@@ -104,4 +123,4 @@ while True:
     pygame.display.flip()
 
     # Задержка для управления частотой обновления
-    pygame.time.Clock().tick(30)
+    pygame.time.Clock().tick(60000)
